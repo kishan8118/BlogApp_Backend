@@ -2,26 +2,31 @@ const mongoose = require("mongoose");
 
 const postSchema = mongoose.Schema(
   {
-    title: { type: String, required: [true, "title is required"], trim: true },
+    title: { type: String, required: [true, "Title is required"], trim: true },
     description: {
       type: String,
-      required: [true, "post description is required"],
+      required: [true, "Description is required"],
       trim: true,
     },
-    category: {
+    categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CategoryModel",
-      required: [true, "post category is required"],
+      required: [true, "Category ID is required"],
+    },
+    category: {
+      type: String,
+      required: [true, "Category is required"],
+      trim: true,
     },
     heading: [String],
-    author: {
+    authorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserModel",
-      required: [true, "Author is required"],
+      required: [true, "Author ID is required"],
     },
     summary: {
       type: String,
-      required: [true, "summury is required"],
+      required: [true, "Summary is required"],
       trim: true,
     },
   },

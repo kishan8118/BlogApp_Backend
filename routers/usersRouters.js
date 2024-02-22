@@ -89,6 +89,21 @@ userRouter.post("/login", async (req, res, next) => {
   res.status(200).json({ token, data: user });
 });
 
+// @hasim get User data
+userRouter.get('/author/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (id) {
+      const author = await UserModel.findById({ _id: id })
+      res.status(200).json({ 'issue': false, 'author': author })
+    } else {
+      res.status(200).json({ 'issue': true, 'message': 'Author Id not found!' })
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message, 'issue': true });
+  }
+})
+
 module.exports = {
   userRouter,
 };

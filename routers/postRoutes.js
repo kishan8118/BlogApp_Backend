@@ -5,26 +5,14 @@ const { authenticateToken } = require("../middleware/tokenMiddleware");
 
 const postRoutes = express.Router();
 
-// @hardik Create new blog
+// @hardik Create new blog //@hasim updated
 postRoutes.post("/create", authenticateToken, async (req, res) => {
   try {
-    const { category } = req.body;
-    // console.log(category);
-
-    // Check if category exists
-    const existingCategory = await CategoryModel.findOne({ title: category });
-
-    if (!existingCategory) {
-      return res
-        .status(400)
-        .json({ message: "Invalid category ID", issue: true });
+    const authorId = req.user;
+    req.body = {
+      ...req.body,
+      authorId
     }
-
-    req.body.author = req.user;
-    // Add category to post
-    req.body.category = existingCategory._id;
-    // console.log(req.body.category);
-
     const newBlog = new PostModel(req.body);
     await newBlog.save();
     res.status(200).json({
