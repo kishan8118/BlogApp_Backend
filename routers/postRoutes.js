@@ -11,8 +11,8 @@ postRoutes.post("/create", authenticateToken, async (req, res) => {
     const authorId = req.user;
     req.body = {
       ...req.body,
-      authorId
-    }
+      authorId,
+    };
     const newBlog = new PostModel(req.body);
     await newBlog.save();
     res.status(200).json({
@@ -25,7 +25,7 @@ postRoutes.post("/create", authenticateToken, async (req, res) => {
   }
 });
 
-// @hardik get all blogs
+// @hardik get all blogs and filter by category
 postRoutes.get("/", async (req, res) => {
   try {
     let filter = {};
@@ -69,6 +69,21 @@ postRoutes.delete("/delete/:id", async (req, res) => {
     res.status(200).json({ message: "Blog delete " });
   } catch (error) {
     res.status(200).json({ message: error.message, issue: true });
+  }
+});
+
+// @hardik other user can see the other all user blog after visiting user name on singleblog page
+postRoutes.get("/author/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (id) {
+      const author = await PostModel.find({ authorId: id });
+      res.status(200).json({ issue: false, author: author });
+    } else {
+      res.status(200).json({ issue: true, message: "Author Id not found!" });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message, issue: true });
   }
 });
 

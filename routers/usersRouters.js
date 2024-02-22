@@ -6,6 +6,7 @@ const multer = require("multer");
 const userRouter = express.Router();
 const path = require("path");
 const { validator } = require("../utils/validators/authValidator");
+const { authenticateToken } = require("../middleware/tokenMiddleware");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -79,30 +80,66 @@ userRouter.post("/login", async (req, res, next) => {
   if (user.isBlocked) {
     return next(new apiError("Your Account has been disabled", 403));
   }
-  //  Create Token
   const token = createToken(user._id);
 
-  //  Delete password from response
   delete user._doc.password;
 
-  //  Send response to client side
   res.status(200).json({ token, data: user });
 });
 
+// hardik get users profile
+userRouter.get("/profile", authenticateToken, async (req, res) => {
+  try {
+    // console.log(req.user);
+    let id = req.user;
+    const users = await UserModel.findById({ _id: id });
+    console.log(users);
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ error: error.message, issue: true });
+  }
+});
+
+// @hardik update users profile
+userRouter.patch("/profile/update/:id", authenticateToken, async (req, res) => {
+  const id = req.user;
+  try {
+    const user = await UserModel.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(400).json({ error: error.message, issue: true });
+  }
+});
+
+// @hardik delete users profile
+userRouter.delete(
+  "/profile/delete/:id",
+  authenticateToken,
+  async (req, res) => {
+    const id = req.user;
+    try {
+      const user = await UserModel.findByIdAndDelete(id);
+      res.status(200).json({ user });
+    } catch (error) {
+      res.status(400).json({ error: error.message, issue: true });
+    }
+  }
+);
+
 // @hasim get User data
-userRouter.get('/author/:id', async (req, res) => {
+userRouter.get("/author/:id", async (req, res) => {
   const { id } = req.params;
   try {
     if (id) {
-      const author = await UserModel.findById({ _id: id })
-      res.status(200).json({ 'issue': false, 'author': author })
+      const author = await UserModel.findById({ _id: id });
+      res.status(200).json({ issue: false, author: author });
     } else {
-      res.status(200).json({ 'issue': true, 'message': 'Author Id not found!' })
+      res.status(200).json({ issue: true, message: "Author Id not found!" });
     }
   } catch (error) {
-    res.status(400).json({ error: error.message, 'issue': true });
+    res.status(400).json({ error: error.message, issue: true });
   }
-})
+});
 
 module.exports = {
   userRouter,

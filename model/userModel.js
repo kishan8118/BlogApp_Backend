@@ -28,6 +28,10 @@ const userSchema = mongoose.Schema(
         ref: "PostModel",
       },
     ],
+    summary: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
