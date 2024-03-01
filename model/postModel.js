@@ -19,10 +19,10 @@ const postSchema = mongoose.Schema(
       trim: true,
     },
     heading: [String],
-    authorId: {
+    author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "UserModel",
-      required: [true, "Author ID is required"],
+      ref: 'user',
+      required: true,
     },
     summary: {
       type: String,
@@ -32,6 +32,13 @@ const postSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+postSchema.virtual('populatedAuthor', {
+  ref: 'user',
+  localField: 'author',
+  foreignField: '_id',
+  justOne: true,
+});
+postSchema.set('toJSON', { virtuals: true });
 
 const PostModel = mongoose.model("post", postSchema);
 module.exports = { PostModel };

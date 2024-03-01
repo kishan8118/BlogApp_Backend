@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { PostModel } = require("./postModel");
 
 const userSchema = mongoose.Schema(
   {
@@ -22,12 +23,6 @@ const userSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
-    posts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "PostModel",
-      },
-    ],
     summary: {
       type: String,
       trim: true,
@@ -35,6 +30,7 @@ const userSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 const UserModel = mongoose.model("user", userSchema);
 

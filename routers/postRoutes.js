@@ -2,6 +2,7 @@ const express = require("express");
 const { PostModel } = require("../model/postModel");
 const { CategoryModel } = require("../model/categoryModel");
 const { authenticateToken } = require("../middleware/tokenMiddleware");
+const { UserModel } = require("../model/userModel");
 
 const postRoutes = express.Router();
 
@@ -9,9 +10,10 @@ const postRoutes = express.Router();
 postRoutes.post("/create", authenticateToken, async (req, res) => {
   try {
     const authorId = req.user;
+    const author = await UserModel.findById(authorId);
     req.body = {
       ...req.body,
-      authorId,
+      author,
     };
     const newBlog = new PostModel(req.body);
     await newBlog.save();
@@ -32,7 +34,7 @@ postRoutes.get("/", async (req, res) => {
     if (req.query.category) {
       filter.category = req.query.category;
     }
-    const blogs = await PostModel.find(filter);
+    const blogs = await PostModel.find(filter).populate('populatedAuthor');
     res.status(200).json({ blogs });
   } catch (error) {
     res.status(200).json({ message: error.message, issue: true });
@@ -51,22 +53,22 @@ postRoutes.get("/", authenticateToken, async (req, res) => {
 });
 
 //@hardik update perticuler blog based on id
-postRoutes.patch("/update/:id", async (req, res) => {
+postRoutes.patch("/update/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const blog = await PostModel.findByIdAndUpdate(id, req.body, { new: true });
-    res.status(200).json({ blog });
+    res.status(200).json({ blog, issue: false });
   } catch (error) {
     res.status(200).json({ message: error.message, issue: true });
   }
 });
 
 //@hardik delete perticuler blog based on id
-postRoutes.delete("/delete/:id", async (req, res) => {
+postRoutes.delete("/delete/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const blog = await PostModel.findByIdAndDelete(id);
-    res.status(200).json({ message: "Blog delete " });
+    res.status(200).json({ message: "Blog delete ", issue: false });
   } catch (error) {
     res.status(200).json({ message: error.message, issue: true });
   }
@@ -86,6 +88,20 @@ postRoutes.get("/author/:id", async (req, res) => {
     res.status(400).json({ error: error.message, issue: true });
   }
 });
+
+postRoutes.get("/categories", async (req, res) => {
+  try {
+    const categories = await PostModel.aggregate([
+      { $group: { _id: "$category" } },
+      { $project: { _id: 0, category: "$_id" } }
+    ]);
+    res.status(200).json({ issue: false, categories: categories })
+  } catch (error) {
+    res.status(400).json({ error: error.message, issue: true });
+
+  }
+})
+
 
 module.exports = {
   postRoutes,

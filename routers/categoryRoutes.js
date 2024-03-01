@@ -24,7 +24,7 @@ categoryRouter.post("/add", async (req, res) => {
 categoryRouter.get("/", async (req, res) => {
   try {
     const category = await CategoryModel.find();
-    res.status(200).json({ category });
+    res.status(200).json({ category, issue: false });
   } catch (error) {
     res.status(200).json({ message: error.message, issue: true });
   }

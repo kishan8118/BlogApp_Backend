@@ -4,7 +4,6 @@ require("dotenv").config();
 function authenticateToken(req, res, next) {
   // Get the token from the request headers or query string
   const token = req.headers["authorization"]?.split(" ")[1] || req.query.token;
-  console.log("testing token");
 
   if (!token) {
     return res.status(401).json({ message: "Authentication token is missing" });
